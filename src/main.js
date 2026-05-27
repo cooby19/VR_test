@@ -29,6 +29,15 @@ const panorama = new THREE.Mesh(
 );
 scene.add(panorama);
 
+scene.add(new THREE.HemisphereLight("#fff5d6", "#396b38", 1.6));
+
+const keyLight = new THREE.DirectionalLight("#ffffff", 2.2);
+keyLight.position.set(-4, 7, 5);
+scene.add(keyLight);
+
+const daylilyPrism = createDaylilyPrismModel();
+scene.add(daylilyPrism);
+
 const pointerState = {
   active: false,
   id: null,
@@ -193,6 +202,41 @@ function animate() {
 
 function shortestAngleDelta(current, target) {
   return Math.atan2(Math.sin(target - current), Math.cos(target - current));
+}
+
+function createDaylilyPrismModel() {
+  const flowerLength = 3.6;
+  const flowerWidth = 0.32;
+  const flowerDepth = 0.26;
+  const geometry = new THREE.BoxGeometry(flowerWidth, flowerLength, flowerDepth);
+  geometry.translate(0, flowerLength / 2, 0);
+
+  const material = new THREE.MeshStandardMaterial({
+    color: "#f4a51c",
+    roughness: 0.72,
+    metalness: 0.02
+  });
+
+  const prism = new THREE.Mesh(geometry, material);
+  prism.castShadow = false;
+  prism.receiveShadow = false;
+
+  const edges = new THREE.LineSegments(
+    new THREE.EdgesGeometry(geometry),
+    new THREE.LineBasicMaterial({
+      color: "#704210",
+      transparent: true,
+      opacity: 0.72
+    })
+  );
+
+  const model = new THREE.Group();
+  model.add(prism);
+  model.add(edges);
+  model.position.set(0.12, -1.62, -7.2);
+  model.rotation.set(THREE.MathUtils.degToRad(4), 0, THREE.MathUtils.degToRad(-10));
+
+  return model;
 }
 
 function createGrasslandPanoramaTexture() {
