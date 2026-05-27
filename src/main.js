@@ -4,6 +4,9 @@ import "./styles.css";
 const canvas = document.querySelector("#scene");
 const hint = document.querySelector("#hint");
 const gyroButton = document.querySelector("#gyroButton");
+const interactionPrompt = document.querySelector("#interactionPrompt");
+const inspectButton = document.querySelector("#inspectButton");
+const inspectNotice = document.querySelector("#inspectNotice");
 
 const scene = new THREE.Scene();
 
@@ -38,6 +41,23 @@ scene.add(keyLight);
 const daylilyPrism = createDaylilyPrismModel();
 scene.add(daylilyPrism);
 
+const hotspots = [
+  createHotspot({
+    id: "daylily",
+    label: "金針花",
+    parent: daylilyPrism,
+    localPosition: new THREE.Vector3(0, 1.65, 0),
+    radius: 0.42,
+    height: 3.15,
+    onInspect: inspectDaylily
+  })
+];
+const hotspotMeshes = hotspots.map((hotspot) => hotspot.mesh);
+const centerRaycaster = new THREE.Raycaster();
+const screenCenter = new THREE.Vector2(0, 0);
+let activeHotspot = null;
+let inspectNoticeTimer = null;
+
 const pointerState = {
   active: false,
   id: null,
@@ -68,6 +88,8 @@ canvas.addEventListener("pointerup", onPointerUp);
 canvas.addEventListener("pointercancel", onPointerUp);
 window.addEventListener("resize", onResize);
 window.addEventListener("orientationchange", updateScreenTransform);
+window.addEventListener("keydown", onKeyDown);
+inspectButton.addEventListener("click", triggerActiveHotspot);
 
 setupGyroButton();
 updateScreenTransform();
@@ -108,6 +130,15 @@ function onPointerUp(event) {
   if (canvas.hasPointerCapture(event.pointerId)) {
     canvas.releasePointerCapture(event.pointerId);
   }
+}
+
+function onKeyDown(event) {
+  if (event.repeat || event.key.toLowerCase() !== "f" || !activeHotspot) {
+    return;
+  }
+
+  event.preventDefault();
+  triggerActiveHotspot();
 }
 
 function setupGyroButton() {
@@ -197,11 +228,74 @@ function animate() {
   camera.rotation.x = view.pitch;
   camera.rotation.z = 0;
 
+  updateHotspotTarget();
   renderer.render(scene, camera);
 }
 
 function shortestAngleDelta(current, target) {
   return Math.atan2(Math.sin(target - current), Math.cos(target - current));
+}
+
+function createHotspot({ id, label, parent, localPosition, radius, height, onInspect }) {
+  const geometry = new THREE.CylinderGeometry(radius, radius, height, 18);
+  const material = new THREE.MeshBasicMaterial({
+    color: "#ffffff",
+    transparent: true,
+    opacity: 0,
+    depthWrite: false
+  });
+  const mesh = new THREE.Mesh(geometry, material);
+
+  mesh.position.copy(localPosition);
+  mesh.userData.hotspotId = id;
+  mesh.userData.hotspotLabel = label;
+  parent.add(mesh);
+
+  return {
+    id,
+    label,
+    mesh,
+    onInspect
+  };
+}
+
+function updateHotspotTarget() {
+  centerRaycaster.setFromCamera(screenCenter, camera);
+  centerRaycaster.near = 0.1;
+  centerRaycaster.far = 14;
+
+  const hit = centerRaycaster.intersectObjects(hotspotMeshes, false)[0];
+  const nextHotspot = hit ? hotspots.find((hotspot) => hotspot.mesh === hit.object) : null;
+
+  if (activeHotspot === nextHotspot) {
+    return;
+  }
+
+  activeHotspot = nextHotspot;
+  interactionPrompt.hidden = !activeHotspot;
+}
+
+function triggerActiveHotspot() {
+  if (!activeHotspot) {
+    return;
+  }
+
+  activeHotspot.onInspect(activeHotspot);
+}
+
+function inspectDaylily(hotspot) {
+  console.log(`檢視${hotspot.label}`);
+  showInspectNotice(`已觸發：檢視${hotspot.label}`);
+}
+
+function showInspectNotice(message) {
+  inspectNotice.textContent = message;
+  inspectNotice.hidden = false;
+
+  window.clearTimeout(inspectNoticeTimer);
+  inspectNoticeTimer = window.setTimeout(() => {
+    inspectNotice.hidden = true;
+  }, 1800);
 }
 
 function createDaylilyPrismModel() {

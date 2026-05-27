@@ -9,6 +9,14 @@
   <body>
     <main id="app" aria-label="360 草原天空場景">
       <canvas id="scene"></canvas>
+      <div class="crosshair" aria-hidden="true">
+        <span></span>
+      </div>
+      <div id="interactionPrompt" class="interactionPrompt" aria-live="polite" hidden>
+        <span class="keyboardPrompt">按 <kbd>F</kbd> 檢視</span>
+        <button id="inspectButton" class="inspectButton" type="button">檢視</button>
+      </div>
+      <div id="inspectNotice" class="inspectNotice" role="status" aria-live="polite" hidden></div>
       <div class="hud" aria-live="polite">
         <p id="hint">拖曳或轉動手機觀看四周</p>
         <button id="gyroButton" type="button" hidden>啟用陀螺儀</button>
