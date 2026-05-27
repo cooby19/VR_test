@@ -16,7 +16,24 @@
         <span class="keyboardPrompt">按 <kbd>F</kbd> 檢視</span>
         <button id="inspectButton" class="inspectButton" type="button">檢視</button>
       </div>
-      <div id="inspectNotice" class="inspectNotice" role="status" aria-live="polite" hidden></div>
+      <section
+        id="dialogueBox"
+        class="dialogueBox"
+        aria-labelledby="dialogueSpeaker"
+        aria-live="polite"
+        hidden
+      >
+        <div class="dialogueHeader">
+          <p id="dialogueSpeaker" class="dialogueSpeaker">校園大使</p>
+          <button id="dialogueCloseButton" class="dialogueIconButton" type="button" aria-label="關閉對話">
+            ×
+          </button>
+        </div>
+        <p id="dialogueText" class="dialogueText"></p>
+        <div class="dialogueActions">
+          <button id="dialogueNextButton" class="dialogueNextButton" type="button">下一句</button>
+        </div>
+      </section>
       <div class="hud" aria-live="polite">
         <p id="hint">拖曳或轉動手機觀看四周</p>
         <button id="gyroButton" type="button" hidden>啟用陀螺儀</button>

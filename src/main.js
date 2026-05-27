@@ -6,7 +6,11 @@ const hint = document.querySelector("#hint");
 const gyroButton = document.querySelector("#gyroButton");
 const interactionPrompt = document.querySelector("#interactionPrompt");
 const inspectButton = document.querySelector("#inspectButton");
-const inspectNotice = document.querySelector("#inspectNotice");
+const dialogueBox = document.querySelector("#dialogueBox");
+const dialogueSpeaker = document.querySelector("#dialogueSpeaker");
+const dialogueText = document.querySelector("#dialogueText");
+const dialogueNextButton = document.querySelector("#dialogueNextButton");
+const dialogueCloseButton = document.querySelector("#dialogueCloseButton");
 
 const scene = new THREE.Scene();
 
@@ -56,7 +60,25 @@ const hotspotMeshes = hotspots.map((hotspot) => hotspot.mesh);
 const centerRaycaster = new THREE.Raycaster();
 const screenCenter = new THREE.Vector2(0, 0);
 let activeHotspot = null;
-let inspectNoticeTimer = null;
+
+const dialogueScripts = {
+  daylily: {
+    speaker: "校園大使",
+    lines: [
+      "你現在看到的是金針花。",
+      "它常見於山坡與開闊草地，花色明亮，遠看像一片金黃色的花海。",
+      "金針花也常被稱為忘憂草，花季時會吸引許多旅人停下來拍照。",
+      "除了觀賞，金針花也能作為食材，曬乾後就是常見的金針。",
+      "之後如果加入角色立繪，這套對話互動可以直接沿用。"
+    ]
+  }
+};
+
+const dialogueState = {
+  scriptId: null,
+  lineIndex: 0,
+  open: false
+};
 
 const pointerState = {
   active: false,
@@ -90,6 +112,8 @@ window.addEventListener("resize", onResize);
 window.addEventListener("orientationchange", updateScreenTransform);
 window.addEventListener("keydown", onKeyDown);
 inspectButton.addEventListener("click", triggerActiveHotspot);
+dialogueNextButton.addEventListener("click", advanceDialogue);
+dialogueCloseButton.addEventListener("click", closeDialogue);
 
 setupGyroButton();
 updateScreenTransform();
@@ -133,12 +157,24 @@ function onPointerUp(event) {
 }
 
 function onKeyDown(event) {
-  if (event.repeat || event.key.toLowerCase() !== "f" || !activeHotspot) {
+  if (event.repeat) {
     return;
   }
 
-  event.preventDefault();
-  triggerActiveHotspot();
+  if (event.key === "Escape" && dialogueState.open) {
+    event.preventDefault();
+    closeDialogue();
+    return;
+  }
+
+  if (dialogueState.open) {
+    return;
+  }
+
+  if (event.key.toLowerCase() === "f" && activeHotspot) {
+    event.preventDefault();
+    triggerActiveHotspot();
+  }
 }
 
 function setupGyroButton() {
@@ -285,17 +321,56 @@ function triggerActiveHotspot() {
 
 function inspectDaylily(hotspot) {
   console.log(`檢視${hotspot.label}`);
-  showInspectNotice(`已觸發：檢視${hotspot.label}`);
+  openDialogue(hotspot.id);
 }
 
-function showInspectNotice(message) {
-  inspectNotice.textContent = message;
-  inspectNotice.hidden = false;
+function openDialogue(scriptId) {
+  if (!dialogueScripts[scriptId]) {
+    return;
+  }
 
-  window.clearTimeout(inspectNoticeTimer);
-  inspectNoticeTimer = window.setTimeout(() => {
-    inspectNotice.hidden = true;
-  }, 1800);
+  dialogueState.scriptId = scriptId;
+  dialogueState.lineIndex = 0;
+  dialogueState.open = true;
+  renderDialogue();
+  dialogueNextButton.focus({ preventScroll: true });
+}
+
+function advanceDialogue() {
+  const script = dialogueScripts[dialogueState.scriptId];
+
+  if (!dialogueState.open || !script) {
+    return;
+  }
+
+  if (dialogueState.lineIndex >= script.lines.length - 1) {
+    closeDialogue();
+    return;
+  }
+
+  dialogueState.lineIndex += 1;
+  renderDialogue();
+}
+
+function closeDialogue() {
+  dialogueState.scriptId = null;
+  dialogueState.lineIndex = 0;
+  dialogueState.open = false;
+  dialogueBox.hidden = true;
+}
+
+function renderDialogue() {
+  const script = dialogueScripts[dialogueState.scriptId];
+
+  if (!dialogueState.open || !script) {
+    closeDialogue();
+    return;
+  }
+
+  dialogueSpeaker.textContent = script.speaker;
+  dialogueText.textContent = script.lines[dialogueState.lineIndex];
+  dialogueNextButton.textContent = dialogueState.lineIndex === script.lines.length - 1 ? "完成" : "下一句";
+  dialogueBox.hidden = false;
 }
 
 function createDaylilyPrismModel() {
