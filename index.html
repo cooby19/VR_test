@@ -3,19 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#7db7e8" />
-    <title>360 草原天空 MVP</title>
-    <script type="module" crossorigin src="/VR_test/assets/index-D3DU7dk8.js"></script>
-    <link rel="stylesheet" crossorigin href="/VR_test/assets/index-DAvK66Ce.css">
+    <meta name="theme-color" content="#d6d0c2" />
+    <title>360 學生宿舍場景</title>
+    <script type="module" crossorigin src="./assets/index-eV6MDJy5.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CYHwbn21.css">
   </head>
   <body>
-    <main id="app" aria-label="360 草原天空場景">
+    <main id="app" aria-label="360 學生宿舍室內場景">
       <canvas id="scene"></canvas>
       <div class="crosshair" aria-hidden="true">
         <span></span>
       </div>
       <div id="interactionPrompt" class="interactionPrompt" aria-live="polite" hidden>
-        <span class="keyboardPrompt">按 <kbd>F</kbd> 檢視</span>
+        <span class="keyboardPrompt">按 <kbd>F</kbd> <span id="keyboardPromptAction">檢視</span></span>
         <button id="inspectButton" class="inspectButton" type="button">檢視</button>
       </div>
       <section
