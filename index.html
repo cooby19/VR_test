@@ -3,17 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#7db7e8" />
-    <title>360 草原天空 MVP</title>
+    <meta name="theme-color" content="#d6d0c2" />
+    <title>360 學生宿舍場景</title>
   </head>
   <body>
-    <main id="app" aria-label="360 草原天空場景">
+    <main id="app" aria-label="360 學生宿舍室內場景">
       <canvas id="scene"></canvas>
       <div class="crosshair" aria-hidden="true">
         <span></span>
       </div>
       <div id="interactionPrompt" class="interactionPrompt" aria-live="polite" hidden>
-        <span class="keyboardPrompt">按 <kbd>F</kbd> 檢視</span>
+        <span class="keyboardPrompt">按 <kbd>F</kbd> <span id="keyboardPromptAction">檢視</span></span>
         <button id="inspectButton" class="inspectButton" type="button">檢視</button>
       </div>
       <section
